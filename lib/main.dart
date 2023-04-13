@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:signin_signup_auth_firebase/screens/connexion.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Appel de Firebase.initializeApp()
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

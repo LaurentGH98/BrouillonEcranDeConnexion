@@ -1,4 +1,46 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:signin_signup_auth_firebase/screens/inscription.dart';
+
+//------------------------------------------------------------------------------
+
+class Auth {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+  User? get currentUser => _firebaseAuth.currentUser;
+
+  Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
+
+  Future<void> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async{
+    await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+    );
+  }
+
+  Future<void> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+    );
+  }
+
+  /*
+  //Pour se déconnecter de la session
+  Future<void> signOut() async{
+    await _firebaseAuth.signOut();
+  }
+  */
+}
+
+//------------------------------------------------------------------------------
 
 class ConnexionScreen extends StatefulWidget {
   const ConnexionScreen({Key? key}) : super(key: key);
@@ -8,6 +50,46 @@ class ConnexionScreen extends StatefulWidget {
 }
 
 class _ConnexionScreenState extends State<ConnexionScreen> {
+
+  String? errorMessage = '';
+  bool isLogin = true;
+
+  final TextEditingController _controllerEmail = TextEditingController();
+  final TextEditingController _controllerPassword = TextEditingController();
+
+  Future<void> signInWithEmailAndPassword() async{
+    try {
+      await Auth().signInWithEmailAndPassword(
+        email: _controllerEmail.text,
+        password: _controllerPassword.text,
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessage = e.message;
+      });
+    }
+
+    /*
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Accueil()),
+    );
+    */
+  }
+
+  Future<void> createUserWithEmailAndPassword() async{
+    try {
+      await Auth().createUserWithEmailAndPassword(
+        email: _controllerEmail.text,
+        password: _controllerPassword.text,
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessage = e.message;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,9 +137,10 @@ class _ConnexionScreenState extends State<ConnexionScreen> {
               const SizedBox(height: 15),
 
 
-              const SizedBox(
+              SizedBox(
                 width: 350,
                 child: TextField(
+                  controller: _controllerEmail,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Color(0xFF1E262C),
@@ -71,30 +154,26 @@ class _ConnexionScreenState extends State<ConnexionScreen> {
               const SizedBox(height: 20),
 
 
-              const SizedBox(
+              SizedBox(
                 width: 350,
                 child: TextField(
-                  obscureText: true,
+                  controller: _controllerPassword,
                   decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Color(0xFF1E262C),
-                    label: Center(
-                      child: Text('Mot de passe'),
-                    ),
-                    labelStyle: TextStyle(color: Colors.white)
+                      filled: true,
+                      fillColor: Color(0xFF1E262C),
+                      label: Center(
+                        child: Text('Mot de passe'),
+                      ),
+                      labelStyle: TextStyle(color: Colors.white)
                   ),
                 ),
               ),
-              const SizedBox(height: 80),
+              const SizedBox(height: 20),
+
 
               ElevatedButton(
                 onPressed: () {
-                  // Naviguer vers l'écran d'accueil'
-                  /*
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()),
-                  );*/
+                  signInWithEmailAndPassword();
                 },
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(350, 55),
@@ -106,12 +185,10 @@ class _ConnexionScreenState extends State<ConnexionScreen> {
 
               ElevatedButton(
                 onPressed: () {
-                  // Naviguer vers l'écran d'inscription
-                  /*
                   Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignInScreen()),
-                  );*/
+                      context,
+                      MaterialPageRoute(builder: (context) => const InscriptionScreen()),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(350, 55),
@@ -129,3 +206,4 @@ class _ConnexionScreenState extends State<ConnexionScreen> {
     );
   }
 }
+
